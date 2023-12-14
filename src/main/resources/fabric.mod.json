@@ -3,7 +3,7 @@
 	"id": "optimal-aim-reborn",
 	"version": "${version}",
 	"name": "Optimal Aim Reborn",
-	"description": "Optimal Aim ported to 1.20.2",
+	"description": "Optimal Aim ported to 1.20",
 	"authors": [
 		"Redth"
 	],
@@ -27,7 +27,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.15.0",
-		"minecraft": "~1.20.2",
+		"minecraft": "1.20.x",
 		"java": ">=17",
 		"fabric-api": "*",
 		"cloth-config2": "*",

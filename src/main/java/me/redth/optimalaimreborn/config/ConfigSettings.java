@@ -13,4 +13,7 @@ public class ConfigSettings implements ConfigData {
 
     @ConfigEntry.ColorPicker(allowAlpha = true)
     public int color = 0xAAAA0000;
+
+    @ConfigEntry.ColorPicker(allowAlpha = true)
+    public int reachableColor = 0xAA00AA00;
 }

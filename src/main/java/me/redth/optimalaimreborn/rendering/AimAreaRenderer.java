@@ -17,20 +17,27 @@ public class AimAreaRenderer {
     public static void render(MatrixStack matrices, VertexConsumerProvider vertexConsumersProvider, LivingEntity entity, float tickDelta) {
         if (!config.enabled) return;
         if (mc.player == null) return;
+        if (entity == mc.player) return;
         if (entity.isDead()) return;
-        if (mc.player.squaredDistanceTo(entity) > config.distance * config.distance) return;
-        Box targetBox = entity.getBoundingBox().contract(0.1);
-        Vec3d eyePosition = mc.player.getCameraPosVec(tickDelta);
-        Vec3d bestHitPositionOffsetted = pointClampedIntoBox(eyePosition, targetBox).subtract(entity.getLerpedPos(tickDelta));
-        Box bestHitAreaOffsetted = new Box(bestHitPositionOffsetted, bestHitPositionOffsetted).expand(0.1);
-        fillBox(matrices, vertexConsumersProvider, bestHitAreaOffsetted, Color.ofTransparent(config.color));
+        if (entity.isInvisible()) return;
+        if (!mc.player.isInRange(entity, config.distance)) return;
+
+        Vec3d cameraPosRelToEntity = mc.player.getCameraPosVec(tickDelta).subtract(entity.getLerpedPos(tickDelta));
+        Box boxAtOrigin = entity.getBoundingBox().offset(entity.getPos().negate());
+        Vec3d closestPoint = pointClampedIntoBox(cameraPosRelToEntity, boxAtOrigin);
+        boolean isWithinReach = closestPoint.isInRange(cameraPosRelToEntity, mc.player.isCreative() ? 5f : 3f);
+        Box shrunkenTargetBox = boxAtOrigin.contract(0.1);
+        Vec3d bestHitPos = pointClampedIntoBox(closestPoint, shrunkenTargetBox);
+        Box bestHitArea = new Box(bestHitPos, bestHitPos).expand(0.1);
+        Color color = Color.ofTransparent(isWithinReach ? config.reachableColor : config.color);
+        fillBox(matrices, vertexConsumersProvider, bestHitArea, color);
     }
 
     private static Vec3d pointClampedIntoBox(Vec3d point, Box box) {
-        double newX = MathHelper.clamp(point.x, box.minX, box.maxX);
-        double newY = MathHelper.clamp(point.y, box.minY, box.maxY);
-        double newZ = MathHelper.clamp(point.z, box.minZ, box.maxZ);
-        return new Vec3d(newX, newY, newZ);
+        double x = MathHelper.clamp(point.x, box.minX, box.maxX);
+        double y = MathHelper.clamp(point.y, box.minY, box.maxY);
+        double z = MathHelper.clamp(point.z, box.minZ, box.maxZ);
+        return new Vec3d(x, y, z);
     }
 
     public static void fillBox(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Box box, Color color) {
